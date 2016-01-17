@@ -1,0 +1,37 @@
+<script src="https://netpie.io/microgear.js"></script>
+<script>
+  const APPKEY    = <kK46WrK7xA7XRvz>;
+  const APPSECRET = <aKOJ86jSp2zQFOmbqOupwlkSUO9Kfm>;
+  const APPID     = <SaveEnergyAtHome>;
+
+    var microgear = Microgear.create({
+        gearkey: APPKEY,
+        gearsecret: APPSECRET
+    });
+
+    microgear.on('message',function(topic,msg) {
+        document.getElementById("data").innerHTML = msg;
+    });
+
+    microgear.on('connected', function() {
+        microgear.setname('htmlgear');
+        document.getElementById("data").innerHTML = "Now I am connected with netpie...";
+        setInterval(function() {
+            microgear.publish("/chat",123);
+        },1000);
+    });
+
+    microgear.on('present', function(event) {
+        console.log(event);
+    });
+
+    microgear.on('absent', function(event) {
+        console.log(event);
+    });
+
+    microgear.resettoken(function(err) {
+        microgear.connect(APPID);
+    });
+</script>
+
+<div id="data">_____</div>

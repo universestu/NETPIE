@@ -1,0 +1,87 @@
+<script src="microgear.js"></script>
+<script src="raphael.2.1.4.min.js"></script>
+<script src="justgage.1.1.0.min.js"></script>
+
+<style>
+	body {
+		text-align: center;
+	}
+      
+	#moi {
+		width:200px; height:160px;
+		display: inline-block;
+	}
+	#name {
+		font-size: 20px;
+		color: blue;
+	}
+	#moisture {
+		display: none;
+		border: 1px solid black;
+		border-radius: 10px;
+		padding: 5px;
+		margin: 10px;
+		background: aliceblue;
+	}
+	#nectec {
+		
+		padding: 10px;
+		width:127px; 
+		height:30px;
+	}
+</style>
+
+<script>
+	var moi;
+	window.onload = function(){
+		moi = new JustGage({
+			id: "moi", 
+			value: 0, 
+			min: 0,
+			max: 100,
+			title: "SOIL MOISTURE",
+			label: "%",
+			levelColors: ["#00fff6","#ff00fc","#1200ff"]
+		});
+	};
+</script>
+
+<script>
+	const APPKEY = "kK46WrK7xA7XRvz";
+	const APPSECRET = "aKOJ86jSp2zQFOmbqOupwlkSUO9Kfm";
+	const APPID = "SaveEnergyAtHome";
+	var microgear = Microgear.create({
+		gearkey: APPKEY,
+		gearsecret: APPSECRET
+	});
+	var timestamp=0;
+	microgear.on('message',function(topic,msg) {
+		var split_msg = msg.split(",");
+		var timestamp_current = new Date().getTime();
+		//console.log(msg);
+		
+		if(typeof(split_msg[3])!='undefined' && split_msg[3]=='soil_moisture_sensor'){
+				document.getElementById("moisture").style.display = "block";
+				document.getElementById("name").innerHTML = split_msg[4].toUpperCase();;
+				moi.refresh(split_msg[0]);
+				timestamp = timestamp_current;
+		}
+	});
+	microgear.on('connected', function() {
+		microgear.setname('webapp');
+		document.getElementById("data").innerHTML = '<p><img src="img/nectec_logo.png" id="nectec" onclick="location.reload()"></p>';
+	});
+	setInterval(function(){
+		
+		microgear.publish("/data","123");
+	},1000);
+	microgear.resettoken(function(err){
+		microgear.connect(APPID);
+	});
+</script>
+
+<div id="data"></div>
+<div id="moisture">
+	<div id="name"></div>
+	<div id="moi"></div>
+</div>
